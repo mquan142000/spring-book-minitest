@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="/layout :: head">
+    <meta charset="UTF-8">
+    <title>List Type</title>
+</head>
+<body>
+<h3>Type</h3>
+<p>
+    <a href="@{/books/create">
+        Add new book
+    </a>
+</p>
+<p>
+    <a href="@{/books}">
+        Books
+    </a>
+</p>
+<div class="notify">
+    <div th:if="${message}">
+        <span th:text="${message}"></span>
+    </div>
+</div>
+
+<table id="books">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="type, typeStat : ${types}">
+        <td th:text="${typeStat.count}"></td>
+        <td><a th:href="@{/types/view-type/{id}(id=${type.getId()})}" th:text="${type.getName()}"></a></td>
+        <td><a th:href="@{/types/update/{id}(id=${type.getId()})}">edit</a></td>
+        <td><a th:href="@{/types/delete/{id}(id=${type.getId()})}">delete</a></td>
+    </tr>
+    </tbody>
+</table>
+<table id="">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Count</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="types, typeStat : ${type1}">
+        <td th:text="${types.getName()}"></td>
+        <td th:text="${types.getNumber()}"></td>
+    </tr>
+    </tbody>
+</table>
+<footer th:replace="/layout :: footer"></footer>
+</body>
+</html>

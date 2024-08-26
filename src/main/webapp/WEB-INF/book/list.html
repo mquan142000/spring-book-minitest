@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="/layout :: head">
+    <meta charset="UTF-8">
+    <title>List Book</title>
+</head>
+<body>
+<h3>Books</h3>
+<p>
+    <a href="@{/books/create}">
+        Add new book
+    </a>
+</p>
+<p>
+    <a href="@{/types}">
+        Types
+    </a>
+</p>
+<div style="margin-bottom: 10px; margin-left: 110px">
+    <form th:action="@{/books/search}" method="post">
+        <label><input type="text" name="search"></label>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+</div>
+<div class="notify">
+    <div th:if="${message}">
+        <span th:text="${message}"></span>
+
+    </div>
+</div>
+<table id="books">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Author</th>
+        <th>Price</th>
+        <th>Type</th>
+        <th>Image</th>
+        <th>Edit</th>
+        <th>Delete</th>
+        <th>Detail</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="book, bookStat : ${books}">
+        <td th:text="${book.getId()}"></td>
+        <td th:text="${book.getName()}"></td>
+        <td th:text="${book.getAuthor()}"></td>
+        <td th:text="${book.getPrice()}"></td>
+        <th:block th:if="${book.getType() != null}">
+            <td th:text="${book.getType().getName()}"></td>
+        </th:block>
+        <th:block th:unless="${book.getType() != null}">
+            <td>Khong co du lieu</td>
+        </th:block>
+        <td><img width="100" height="100" th:src="@{'/i/'+${book.getImg()}}" src="" alt=""></td>
+        <td><a th:href="@{/books/{id}/edit(id=${book.getId()})}">Edit</a></td>
+        <td><a th:href="@{/books/{id}/delete(id=${book.getId()})}">Delete</a></td>
+        <td><a th:href="@{/books/{id}/view(id=${book.getId()})}">Detail</a></td>
+    </tbody>
+</table>
+<p th:text="${a}"></p>
+<footer th:replace="/layout :: footer"></footer>
+</body>
+</html>
