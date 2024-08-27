@@ -11,32 +11,35 @@
         Back to book list
     </a>
 </p>
-<p th:text="${a}"></p>
 <div id="form">
-    <form th:action="@{/books/create}" th:object="${book}"
+    <form th:action="@{/books/save}" th:object="${book}"
           method="POST" enctype="multipart/form-data" novalidate="novalidate">
         <input type="hidden" th:field="*{id}"/>
         <div>
+            <label for="id">Id</label>
+            <input type="text" id="id" th:field="*{id}"/>
+        </div>
+        <div>
             <label for="name">Name</label>
-            <input type="text" id="name" th:field="*{name}" required/>
+            <input type="text" id="name" th:field="*{name}"/>
         </div>
         <div>
             <label for="author">Author</label>
-            <input type="text" id="author" th:field="*{author}" required/>
+            <input type="text" id="author" th:field="*{author}"/>
         </div>
         <div>
             <label for="price">Price</label>
-            <input type="number" id="price" th:field="*{price}" min="0" required/>
+            <input type="text" id="price" th:field="*{price}"/>
         </div>
         <div>
             <label for="type">Type</label>
-            <select id="type" th:field="*{type}" required>
+            <select id="type" th:field="*{type}">
                 <option th:each="t : ${types}" th:value="${t.id}" th:text="${t.name}"></option>
             </select>
         </div>
         <div>
             <label for="image">Image</label>
-            <input type="file" id="image" th:field="*{image}" accept="image/*"/>
+            <input type="file" id="image" th:field="*{image}"/>
         </div>
         <input type="submit" value="Save"/>
     </form>

@@ -1,18 +1,25 @@
 package com.example.springbookminitest.controller;
 
 import com.example.springbookminitest.model.Book;
+import com.example.springbookminitest.model.BookForm;
 import com.example.springbookminitest.model.Type;
 import com.example.springbookminitest.service.IBookService;
 import com.example.springbookminitest.service.ITypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 @Controller
@@ -32,84 +39,115 @@ public class BookController {
         return typeService.findAll();
     }
 
-    @GetMapping
-    public ModelAndView listBook() {
-        Iterable<Book> books = bookService.findAll();
-        ModelAndView modelAndView = new ModelAndView("/book/list");
-        modelAndView.addObject("books", books);
-        return modelAndView;
+    @GetMapping("")
+    public String index(@RequestParam(defaultValue = "0") int page, Model model) {
+        int pageSize = 5;
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Book> bookPage = bookService.findAll(pageable);
+        model.addAttribute("bookList", bookPage);
+
+        return "/book/list";
+    }
+
+
+    @GetMapping("/create")
+    public String create(Model model) {
+        model.addAttribute("book", new Book());
+        return "/book/create";
+    }
+
+    @PostMapping("/save")
+    public String save(BookForm bookForm) {
+        MultipartFile file = bookForm.getImage();
+
+        String fileName = file.getOriginalFilename();
+
+        try {
+            FileCopyUtils.copy(file.getBytes(), new File(upload + fileName));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Book book = new Book();
+            book.setId(bookForm.getId());
+            book.setName(bookForm.getName());
+            book.setAuthor(bookForm.getAuthor());
+            book.setPrice(bookForm.getPrice());
+            book.setImage(fileName);
+            book.setType(bookForm.getType());
+            bookService.save(book);
+            return "redirect:/books";
+        }
+    }
+
+//    @PostMapping("/create1")
+//    public String create(@RequestParam String name,
+//                         @RequestParam String author,
+//                         @RequestParam double price,
+//                         @RequestParam String image,
+//                         @RequestParam Long typeId) {
+//        Book book = new Book();
+//        book.setName(name);
+//        book.setAuthor(author);
+//        book.setPrice(price);
+//        book.setImage(image);
+//        Type t = typeService.findById(typeId).get();
+//        book.setType(t);
+//        return "redirect:/books";
+//    }
+
+
+    @GetMapping("/{id}/edit")
+    public String showFormEdit(@PathVariable Long id, Model model) {
+        model.addAttribute("book", bookService.findById(id));
+        return "/book/update";
+    }
+
+    @PostMapping("/update")
+    public String update(BookForm bookForm) {
+        MultipartFile file = bookForm.getImage();
+
+        String fileName = file.getOriginalFilename();
+
+        try {
+            FileCopyUtils.copy(file.getBytes(), new File(upload + fileName));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Book book = new Book();
+            book.setId(bookForm.getId());
+            book.setName(bookForm.getName());
+            book.setAuthor(bookForm.getAuthor());
+            book.setPrice(bookForm.getPrice());
+            book.setType(bookForm.getType());
+            book.setImage(fileName);
+            bookService.save(book);
+            return "redirect:/book";
+        }
+    }
+
+    @GetMapping("/{id}/delete")
+    public String showFormDelete(@PathVariable Long id, Model model) {
+        model.addAttribute("book", bookService.findById(id));
+        Iterable<Type> types = typeService.findAll();
+        model.addAttribute("types", types);
+        return "/book/delete";
+    }
+
+    @PostMapping("/delete")
+    public String delete(Long id, RedirectAttributes redirect) {
+        bookService.remove(id);
+        redirect.addFlashAttribute("message", "Removed book successfully");
+        return "redirect:/books";
     }
 
     @GetMapping("/search")
-    public ModelAndView listBooksSearch(@RequestParam("search") Optional<String> search, Pageable pageable) {
-        Page<Book> books;
-        if (search.isPresent()) {
-            books = bookService.findAllByNameContaining(pageable, search.get());
-        } else {
-            books = bookService.findAll(pageable);
-        }
-        ModelAndView modelAndView = new ModelAndView("/book/list");
-        modelAndView.addObject("books", books);
-        return modelAndView;
+    public String search(@RequestParam("name") String name,
+                         @RequestParam(value = "page", defaultValue = "0") int page,
+                         @RequestParam(value = "size", defaultValue = "10") int size,
+                         Model model) {
+        Page<Book> bookList = bookService.findAllByNameContaining(PageRequest.of(page, size), name);
+        model.addAttribute("bookList", bookList);
+        return "/book/list";
     }
 
-    @GetMapping("/create")
-    public ModelAndView createForm() {
-        ModelAndView modelAndView = new ModelAndView("/book/create");
-        modelAndView.addObject("book", new Book());
-        return modelAndView;
-    }
-
-    @PostMapping("/create")
-    public String create(@ModelAttribute("book") Book book,
-                         RedirectAttributes redirectAttributes) {
-        bookService.save(book);
-        redirectAttributes.addFlashAttribute("message", "Create new book successfully");
-        return "redirect:/books";
-    }
-
-    @PostMapping("/create1")
-    public String create(@RequestParam String name,
-                         @RequestParam String author,
-                         @RequestParam double price,
-                         @RequestParam String image,
-                         @RequestParam Long typeId) {
-        Book book = new Book();
-        book.setName(name);
-        book.setAuthor(author);
-        book.setPrice(price);
-        book.setImage(image);
-        Type t = typeService.findById(typeId).get();
-        book.setType(t);
-        return "redirect:/books";
-    }
-
-
-    @GetMapping("/update/{id}")
-    public ModelAndView updateForm(@PathVariable Long id) {
-        Optional<Book> book = bookService.findById(id);
-        if (book.isPresent()) {
-            ModelAndView modelAndView = new ModelAndView("/book/update");
-            modelAndView.addObject("book", book.get());
-            return modelAndView;
-        } else {
-            return new ModelAndView("/error_404");
-        }
-    }
-
-    @PostMapping("/update/{id}")
-    public String update(@ModelAttribute("book") Book book,
-                         RedirectAttributes redirectAttributes) {
-        bookService.save(book);
-        redirectAttributes.addFlashAttribute("message", "Update book successfully");
-        return "redirect:/books";
-    }
-
-    @GetMapping("/delete/{id}")
-    public String delete(@PathVariable Long id,
-                         RedirectAttributes redirectAttributes) {
-        bookService.remove(id);
-        redirectAttributes.addFlashAttribute("message", "Delete book successfully");
-        return "redirect:/books";
-    }
 }

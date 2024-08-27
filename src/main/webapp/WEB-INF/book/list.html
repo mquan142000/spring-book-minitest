@@ -25,7 +25,6 @@
 <div class="notify">
     <div th:if="${message}">
         <span th:text="${message}"></span>
-
     </div>
 </div>
 <table id="books">
@@ -43,24 +42,35 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:each="book, bookStat : ${books}">
-        <td th:text="${book.getId()}"></td>
-        <td th:text="${book.getName()}"></td>
-        <td th:text="${book.getAuthor()}"></td>
-        <td th:text="${book.getPrice()}"></td>
-        <th:block th:if="${book.getType() != null}">
-            <td th:text="${book.getType().getName()}"></td>
+    <tr th:each="book : ${bookList.content}">
+        <td th:text="${book.id}"></td>
+        <td th:text="${book.name}"></td>
+        <td th:text="${book.author}"></td>
+        <td th:text="${book.price}"></td>
+        <th:block th:if="${book.type != null}">
+            <td th:text="${book.type.name}"></td>
         </th:block>
-        <th:block th:unless="${book.getType() != null}">
-            <td>Khong co du lieu</td>
+        <th:block th:unless="${book.type != null}">
+            <td>No data</td>
         </th:block>
-        <td><img width="100" height="100" th:src="@{'/i/'+${book.getImg()}}" src="" alt=""></td>
-        <td><a th:href="@{/books/{id}/edit(id=${book.getId()})}">Edit</a></td>
-        <td><a th:href="@{/books/{id}/delete(id=${book.getId()})}">Delete</a></td>
-        <td><a th:href="@{/books/{id}/view(id=${book.getId()})}">Detail</a></td>
+        <td><img width="100" height="100" th:src="@{'/i/'+${book.image}}" src="" alt=""></td>
+        <td><a th:href="@{/books/{id}/edit(id=${book.id})}">Edit</a></td>
+        <td><a th:href="@{/books/{id}/delete(id=${book.id})}">Delete</a></td>
+        <td><a th:href="@{/books/{id}/view(id=${book.id})}">Detail</a></td>
+    </tr>
     </tbody>
 </table>
-<p th:text="${a}"></p>
+
+<div>
+    <a th:if="${bookList.hasPrevious()}"
+       th:href="@{/books(page=${bookList.number - 1})}">Previous</a>
+    <span th:text="${bookList.number + 1}"></span> / <span th:text="${bookList.totalPages}"></span>
+    <a th:if="${bookList.hasNext()}"
+       th:href="@{/books(page=${bookList.number + 1})}">Next</a>
+</div>
+
+<p th:if="${bookList.isEmpty()}">No books available</p>
+
 <footer th:replace="/layout :: footer"></footer>
 </body>
 </html>

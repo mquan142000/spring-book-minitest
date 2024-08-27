@@ -11,9 +11,8 @@
         Back to book list
     </a>
 </p>
-<p th:text="${demo}"></p>
 <div id="form">
-    <form th:action="@{/books/update/{id}(id=${book.getId()})}" th:object="${book}"
+    <form th:action="@{/books/edit}" th:object="${book}"
           method="POST" enctype="multipart/form-data" novalidate="novalidate">
         <input type="hidden" th:field="*{id}"/>
         <div>
