@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
@@ -20,7 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/books")
@@ -33,6 +35,18 @@ public class BookController {
 
     @Autowired
     private ITypeService typeService;
+
+    @GetMapping("/")
+    public ModelAndView index() {
+        return new ModelAndView("/book/list");
+    }
+
+//    @GetMapping("/admin")
+//    public ModelAndView admin(){
+//        SecurityContext context = SecurityContextHolder.getContext();
+//        System.out.println(context.getAuthentication().getName());
+//        return new ModelAndView("/admin");
+//    }
 
     @ModelAttribute("types")
     public Iterable<Type> listTypes() {
@@ -121,7 +135,7 @@ public class BookController {
             book.setType(bookForm.getType());
             book.setImage(fileName);
             bookService.save(book);
-            return "redirect:/book";
+            return "redirect:/books";
         }
     }
 
